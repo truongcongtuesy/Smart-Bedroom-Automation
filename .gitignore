@@ -1,0 +1,15 @@
+# Secrets — never commit real credentials
+**/thingspeak_config.h
+**/secrets.h
+.env
+
+# Build artifacts
+*.bin
+*.elf
+.pio/
+build/
+
+# OS/editor junk
+.DS_Store
+Thumbs.db
+.vscode/
