@@ -7,25 +7,25 @@ automation rule engine.
 
 ## Contents
 
-- `src/` — Arduino/ESP32 source files
-  - `sensors.ino` / `sensors.cpp` — DHT22, PIR, LDR reading + calibration
-  - `actuators.ino` / `actuators.cpp` — Relay (fan), LED, Buzzer control
-  - `automation_rules.ino` / `.cpp` — R1–R3 rule logic, hysteresis
-  - `main.ino` — setup()/loop(), non-blocking millis() timing
+- `src/main.cpp` — full firmware: sensor reading (DHT22, PIR, LDR) with NaN
+  handling, actuator control (relay/LED/buzzer), and the R1–R3 automation rule
+  engine with `millis()` non-blocking timing.
+- `diagram.json` — Wokwi circuit definition (ESP32 + all sensors/actuators).
+- `platformio.ini` — PlatformIO build config (ESP32 Arduino framework, DHT lib).
+- `wokwi.toml` — points the Wokwi simulator at the compiled firmware.
 
 ## Hardware
 
 | Component | ESP32 Pin | Notes |
 |---|---|---|
-| DHT22 | GPIO 15 | Temp + humidity |
-| PIR | GPIO 27 | Digital motion |
-| LDR | GPIO 34 | Analog (ADC pin) |
-| Relay (fan) | GPIO ? | Fill in |
-| LED | GPIO ? | Fill in |
-| Buzzer | GPIO ? | Fill in |
+| DHT22 | GPIO 15 | Temp + humidity (single-wire data) |
+| PIR | GPIO 27 | Digital motion, HIGH when detected |
+| LDR | GPIO 34 | Analog input (ADC1, input-only pin) |
+| Relay (fan) | GPIO 26 | Digital output, drives fan ON/OFF |
+| LED | GPIO 25 | Digital output (via 220Ω resistor) |
+| Buzzer | GPIO 33 | Digital output, short beep pulses |
 
-_Update the pin table above and link the Wokwi project here:_
-`[Wokwi project link]`
+_Wokwi project link:_ `[Add your saved Wokwi project URL here]`
 
 ## Automation Rules
 

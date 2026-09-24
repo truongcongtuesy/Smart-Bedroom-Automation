@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "author": "Group 10 - 3707ICT Smart Bedroom Automation",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp32", "top": 0, "left": -50, "attrs": {} },
+    { "type": "wokwi-dht22", "id": "dht22", "top": -76.4, "left": 148, "attrs": {} },
+    { "type": "wokwi-pir-motion-sensor", "id": "pir1", "top": -76.4, "left": 260, "attrs": {} },
+    { "type": "wokwi-photoresistor-sensor", "id": "ldr1", "top": -76.4, "left": 372, "attrs": {} },
+    { "type": "wokwi-relay-module", "id": "relay1", "top": 96, "left": 148, "attrs": {} },
+    { "type": "wokwi-led", "id": "led1", "top": 106, "left": 268, "attrs": { "color": "yellow" } },
+    { "type": "wokwi-resistor", "id": "r1", "top": 122, "left": 300, "attrs": { "value": "220" } },
+    { "type": "wokwi-buzzer", "id": "buzzer1", "top": 96, "left": 372, "attrs": {} }
+  ],
+  "connections": [
+    [ "esp32:3V3", "dht22:VCC", "red", [] ],
+    [ "esp32:GND.1", "dht22:GND", "black", [] ],
+    [ "esp32:D15", "dht22:SDA", "green", [] ],
+
+    [ "esp32:3V3", "pir1:VCC", "red", [] ],
+    [ "esp32:GND.1", "pir1:GND", "black", [] ],
+    [ "esp32:D27", "pir1:OUT", "yellow", [] ],
+
+    [ "esp32:3V3", "ldr1:VCC", "red", [] ],
+    [ "esp32:GND.2", "ldr1:GND", "black", [] ],
+    [ "esp32:D34", "ldr1:AOUT", "yellow", [] ],
+
+    [ "esp32:5V", "relay1:VCC", "red", [] ],
+    [ "esp32:GND.2", "relay1:GND", "black", [] ],
+    [ "esp32:D26", "relay1:IN", "green", [] ],
+
+    [ "esp32:D25", "led1:A", "green", [] ],
+    [ "led1:C", "r1:1", "black", [] ],
+    [ "r1:2", "esp32:GND.3", "black", [] ],
+
+    [ "esp32:D33", "buzzer1:1", "green", [] ],
+    [ "buzzer1:2", "esp32:GND.3", "black", [] ]
+  ]
+}
