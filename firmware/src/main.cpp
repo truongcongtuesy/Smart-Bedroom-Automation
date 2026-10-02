@@ -2,10 +2,9 @@
 // R1 temperature (closed-loop), R2 light+motion, R3 energy saving. millis() timing.
 
 #include <Arduino.h>
-#include <DHT.h>
+#include <DHTesp.h>
 
 #define DHT_PIN     15
-#define DHT_TYPE    DHT22
 #define PIR_PIN     27
 #define LDR_PIN     34
 #define RELAY_PIN   26
@@ -16,10 +15,10 @@ const float TEMP_ON_THRESHOLD   = 30.0f;
 const float TEMP_OFF_THRESHOLD  = 28.0f;
 const int   LDR_DARK_THRESHOLD  = 1500;
 const unsigned long NO_MOTION_TIMEOUT_MS    = 5UL * 60UL * 1000UL;
-const unsigned long SENSOR_READ_INTERVAL_MS = 2000;
+const unsigned long SENSOR_READ_INTERVAL_MS = 2500;
 const unsigned long BUZZER_BEEP_MS          = 150;
 
-DHT dht(DHT_PIN, DHT_TYPE);
+DHTesp dht;
 
 float temperature = NAN;
 float humidity = NAN;
@@ -45,7 +44,9 @@ void updateBuzzer(unsigned long now);
 
 void setup() {
   Serial.begin(115200);
-  dht.begin();
+  pinMode(DHT_PIN, INPUT_PULLUP);
+  dht.setup(DHT_PIN, DHTesp::DHT22);
+  delay(2000);
 
   pinMode(PIR_PIN, INPUT);
   pinMode(RELAY_PIN, OUTPUT);
@@ -74,12 +75,13 @@ void readSensors(unsigned long now) {
   if (now - lastSensorRead < SENSOR_READ_INTERVAL_MS) return;
   lastSensorRead = now;
 
-  float t = dht.readTemperature();
-  float h = dht.readHumidity();
+  TempAndHumidity reading = dht.getTempAndHumidity();
+  float t = reading.temperature;
+  float h = reading.humidity;
 
   if (isnan(t) || isnan(h)) {
     sensorFault = true;
-    Serial.println("[WARN] DHT22 returned NaN - safe state");
+    Serial.printf("[WARN] DHT22 fault (%s) - safe state\r\n", dht.getStatusString());
   } else {
     sensorFault = false;
     temperature = t;
@@ -93,7 +95,7 @@ void readSensors(unsigned long now) {
     lastMotionTime = now;
   }
 
-  Serial.printf("T=%.1fC H=%.1f%% Light=%d Motion=%d Fault=%d\n",
+  Serial.printf("T=%.1fC H=%.1f%% Light=%d Motion=%d Fault=%d\r\n",
                 temperature, humidity, lightLevel, motionDetected, sensorFault);
 }
 
@@ -103,7 +105,7 @@ void evaluateAutomationRules(unsigned long now) {
     if (!energySavingActive) {
       energySavingActive = true;
       triggerBuzzerBeep(now);
-      Serial.println("[R3] No motion -> actuators OFF");
+      Serial.println("[R3] No motion -> actuators OFF");  // println already emits CRLF
     }
     setFan(false);
     setLed(false);
@@ -128,14 +130,14 @@ void setFan(bool on) {
   if (fanState == on) return;
   fanState = on;
   digitalWrite(RELAY_PIN, on ? HIGH : LOW);
-  Serial.printf("[R1] Fan %s\n", on ? "ON" : "OFF");
+  Serial.printf("[R1] Fan %s\r\n", on ? "ON" : "OFF");
 }
 
 void setLed(bool on) {
   if (ledState == on) return;
   ledState = on;
   digitalWrite(LED_PIN, on ? HIGH : LOW);
-  Serial.printf("[R2] LED %s\n", on ? "ON" : "OFF");
+  Serial.printf("[R2] LED %s\r\n", on ? "ON" : "OFF");
 }
 
 void triggerBuzzerBeep(unsigned long now) {

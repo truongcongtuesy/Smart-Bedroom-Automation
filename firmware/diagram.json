@@ -3,7 +3,7 @@
   "author": "Group 10 - 3707ICT Smart Bedroom Automation",
   "editor": "wokwi",
   "parts": [
-    { "type": "board-esp32-devkit-c-v4", "id": "esp32", "top": 0, "left": -50, "attrs": {} },
+    { "type": "wokwi-esp32-devkit-v1", "id": "esp32", "top": 0, "left": -50, "attrs": {} },
     { "type": "wokwi-dht22", "id": "dht22", "top": -76.4, "left": 148, "attrs": {} },
     { "type": "wokwi-pir-motion-sensor", "id": "pir1", "top": -76.4, "left": 260, "attrs": {} },
     { "type": "wokwi-photoresistor-sensor", "id": "ldr1", "top": -76.4, "left": 372, "attrs": {} },
@@ -13,6 +13,9 @@
     { "type": "wokwi-buzzer", "id": "buzzer1", "top": 96, "left": 372, "attrs": {} }
   ],
   "connections": [
+
+    [ "esp32:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp32:RX0", "$serialMonitor:TX", "", [] ],
     [ "esp32:3V3", "dht22:VCC", "red", [] ],
     [ "esp32:GND.1", "dht22:GND", "black", [] ],
     [ "esp32:D15", "dht22:SDA", "green", [] ],
