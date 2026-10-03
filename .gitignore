@@ -2,6 +2,7 @@
 **/thingspeak_config.h
 **/secrets.h
 .env
+*credentials*.txt
 
 # Build artifacts
 *.bin

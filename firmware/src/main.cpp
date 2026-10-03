@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <DHTesp.h>
+#include "cloud_mqtt.h"   // Cloud/Comm.: Wi-Fi + MQTT to ThingSpeak
 
 #define DHT_PIN     15
 #define PIR_PIN     27
@@ -25,6 +26,7 @@ float humidity = NAN;
 int   lightLevel = 0;
 bool  motionDetected = false;
 bool  sensorFault = false;
+bool  motionInWindow = false;   // PIR seen since the last cloud publish
 
 bool fanState = false;
 bool ledState = false;
@@ -58,6 +60,7 @@ void setup() {
   digitalWrite(BUZZER_PIN, LOW);
 
   lastMotionTime = millis();
+  cloudBegin();
   Serial.println("[BOOT] Smart Bedroom Automation ready");
 }
 
@@ -68,7 +71,13 @@ void loop() {
   evaluateAutomationRules(now);
   updateBuzzer(now);
 
-  // Cloud/Comm. lead: publish readings/state over MQTT here.
+  // Cloud/Comm.: telemetry. Never blocks the rules above.
+  cloudLoop(now);
+  int lightPercent = constrain(map(lightLevel, 0, 4095, 0, 100), 0, 100);
+  bool sampleValid = !sensorFault && !isnan(temperature) && !isnan(humidity);
+  if (cloudPublishIfDue(now, temperature, humidity, lightPercent, motionInWindow, sampleValid)) {
+    motionInWindow = false;   // start a new 20 s occupancy window
+  }
 }
 
 void readSensors(unsigned long now) {
@@ -93,6 +102,7 @@ void readSensors(unsigned long now) {
 
   if (motionDetected) {
     lastMotionTime = now;
+    motionInWindow = true;
   }
 
   Serial.printf("T=%.1fC H=%.1f%% Light=%d Motion=%d Fault=%d\r\n",
