@@ -26,7 +26,7 @@
 
     [ "esp32:3V3", "ldr1:VCC", "red", [] ],
     [ "esp32:GND.2", "ldr1:GND", "black", [] ],
-    [ "esp32:D34", "ldr1:AOUT", "yellow", [] ],
+    [ "esp32:D34", "ldr1:AO", "yellow", [] ],
 
     [ "esp32:5V", "relay1:VCC", "red", [] ],
     [ "esp32:GND.2", "relay1:GND", "black", [] ],
