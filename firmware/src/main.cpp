@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <DHTesp.h>
 #include "cloud_mqtt.h"   // Cloud/Comm.: Wi-Fi + MQTT to ThingSpeak
+#include "edge_intelligence.h"   // occupancy-pattern learning (Edge Intelligence)
  
 #define DHT_PIN     15
 #define PIR_PIN     27
@@ -61,6 +62,7 @@ void setup() {
  
   lastMotionTime = millis();
   cloudBegin();
+  edgeBegin();
   Serial.println("[BOOT] Smart Bedroom Automation ready");
 }
  
@@ -81,7 +83,7 @@ void loop() {
 }
  
 void readSensors(unsigned long now) {
-  if (now - lastSensorRead < SENSOR_READ_INTERVAL_MS) return;
+  if (now - lastSensorRead < edgeSensorIntervalMs()) return;   // adaptive polling
   lastSensorRead = now;
  
   TempAndHumidity reading = dht.getTempAndHumidity();
@@ -104,6 +106,7 @@ void readSensors(unsigned long now) {
     lastMotionTime = now;
     motionInWindow = true;
   }
+  edgeUpdate(now, motionDetected);   // feed the occupancy pattern
  
   Serial.printf("T=%.1fC H=%.1f%% Light=%d Motion=%d Fault=%d\r\n",
                 temperature, humidity, lightLevel, motionDetected, sensorFault);
@@ -133,7 +136,8 @@ void evaluateAutomationRules(unsigned long now) {
   }
  
   // R2: dark AND motion
-  setLed(lightLevel > LDR_DARK_THRESHOLD && motionDetected);
+  bool present = motionDetected || edgeKeepLit(now, lastMotionTime);   // HIGH hours: short hold after motion
+  setLed(lightLevel > LDR_DARK_THRESHOLD && present);
 }
  
 void setFan(bool on) {
